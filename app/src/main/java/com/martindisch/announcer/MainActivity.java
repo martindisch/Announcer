@@ -9,17 +9,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private boolean permissionToRecordAccepted = false;
-    private String[] permissions = {Manifest.permission.RECORD_AUDIO};
-
-    private Button mRecordButton, mPlayButton;
+    private Button mRecordButton, mPlayButton, mUploadButton;
     private boolean mRecording = false;
     private RecordWaveTask recordTask = null;
     private String mFileName = null;
@@ -53,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
                 startPlaying();
             }
         });
+        mUploadButton = findViewById(R.id.bUpload);
+        mUploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         // Prepare the record task
         recordTask = new RecordWaveTask();
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         mFileName = getExternalCacheDir().getAbsolutePath();
         mFileName += "/message.wav";
 
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
     }
 
     private void startPlaying() {
@@ -99,12 +103,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                break;
+        for (int i : grantResults) {
+            if (i != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, R.string.need_permissions, Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
-        if (!permissionToRecordAccepted) finish();
     }
 
     @Override

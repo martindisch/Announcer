@@ -3,4 +3,6 @@
     <string name="record_start">Start recording</string>
     <string name="record_stop">Stop recording</string>
     <string name="play">Play</string>
+    <string name="upload">Upload and play</string>
+    <string name="need_permissions">Need permissions</string>
 </resources>
