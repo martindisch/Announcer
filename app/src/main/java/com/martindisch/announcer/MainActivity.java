@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Set action of button click
         mRecordButton = findViewById(R.id.bRecord);
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Attempt restoring previous settings from preferences
         mHost = findViewById(R.id.etHost);
         mPort = findViewById(R.id.etPort);
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
@@ -61,10 +63,11 @@ public class MainActivity extends AppCompatActivity {
         // Prepare the record task
         recordTask = new RecordWaveTask();
 
-        // Record to the external cache directory for visibility
+        // Prepare the record file
         mFileName = getExternalCacheDir().getAbsolutePath();
         mFileName += "/message.wav";
 
+        // Request permissions
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
     }
 
@@ -125,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Iterate over all requested permissions
         for (int i : grantResults) {
+            // If one of them was not granted, exit
             if (i != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, R.string.need_permissions, Toast.LENGTH_SHORT).show();
                 finish();
@@ -136,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
+        // Make sure to disconnect the SSH session
         if (mSession != null) {
             mSession.disconnect();
         }
