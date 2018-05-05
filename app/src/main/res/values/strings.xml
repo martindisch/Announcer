@@ -2,9 +2,8 @@
     <string name="app_name">Announcer</string>
     <string name="record_start">Start recording</string>
     <string name="record_stop">Stop recording</string>
-    <string name="play">Play</string>
-    <string name="upload">Upload and play</string>
     <string name="need_permissions">Need permissions</string>
     <string name="host">Host</string>
     <string name="port">Port</string>
+    <string name="keys">Place SSH keys in internal storage as Announcer/id_rsa</string>
 </resources>

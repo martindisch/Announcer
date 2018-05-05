@@ -3,7 +3,6 @@ package com.martindisch.announcer;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -22,16 +21,14 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
 import java.io.File;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button mRecordButton, mPlayButton, mUploadButton;
+    private Button mRecordButton;
     private EditText mHost, mPort;
     private boolean mRecording = false;
     private RecordWaveTask recordTask = null;
     private String mFileName = null;
-    private MediaPlayer mPlayer = null;
     private Session mSession = null;
 
     @Override
@@ -45,66 +42,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!mRecording) {
                     mRecordButton.setText(R.string.record_stop);
-                    mPlayButton.setEnabled(false);
                     launchTask();
                 } else {
                     recordTask.cancel(false);
                     mRecordButton.setText(R.string.record_start);
-                    mPlayButton.setEnabled(true);
+                    uploadAndPlay();
                 }
                 mRecording = !mRecording;
             }
         });
-        mPlayButton = findViewById(R.id.bPlay);
-        mPlayButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startPlaying();
-            }
-        });
-        mUploadButton = findViewById(R.id.bUpload);
-        mUploadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Save entered connection details to preferences
-                SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                final String host = mHost.getText().toString();
-                final int port = Integer.parseInt(mPort.getText().toString());
-                editor.putString("host", host);
-                editor.putInt("port", port);
-                editor.apply();
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // Set up JSch
-                            JSch.setConfig("StrictHostKeyChecking", "no");
-                            JSch jsch = new JSch();
-                            File privateKey = new File(Environment.getExternalStorageDirectory(), "Announcer/id_rsa");
-                            jsch.addIdentity(privateKey.getAbsolutePath());
-                            mSession = jsch.getSession("root", host, port);
-                            mSession.connect();
-
-                            // Start SFTP channel to upload the message
-                            ChannelSftp channelsftp = (ChannelSftp) mSession.openChannel("sftp");
-                            channelsftp.connect();
-                            channelsftp.put(getExternalCacheDir().getAbsolutePath() + "/message.wav", "message.wav");
-                            channelsftp.disconnect();
-
-                            // Start SSH channel to play the message
-                            ChannelExec channelssh = (ChannelExec) mSession.openChannel("exec");
-                            channelssh.setCommand("aplay message.wav");
-                            channelssh.connect();
-                            channelssh.disconnect();
-                        } catch (JSchException | SftpException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
-            }
-        });
         mHost = findViewById(R.id.etHost);
         mPort = findViewById(R.id.etPort);
         SharedPreferences prefs = getPreferences(MODE_PRIVATE);
@@ -121,24 +68,6 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
     }
 
-    private void startPlaying() {
-        mRecordButton.setEnabled(false);
-        mPlayer = new MediaPlayer();
-        try {
-            mPlayer.setDataSource(mFileName);
-            mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    mRecordButton.setEnabled(true);
-                }
-            });
-            mPlayer.prepare();
-            mPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void launchTask() {
         switch (recordTask.getStatus()) {
             case FINISHED:
@@ -151,6 +80,46 @@ public class MainActivity extends AppCompatActivity {
         }
         File wavFile = new File(mFileName);
         recordTask.execute(wavFile);
+    }
+
+    private void uploadAndPlay() {
+        // Save entered connection details to preferences
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        final String host = mHost.getText().toString();
+        final int port = Integer.parseInt(mPort.getText().toString());
+        editor.putString("host", host);
+        editor.putInt("port", port);
+        editor.apply();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Set up JSch
+                    JSch.setConfig("StrictHostKeyChecking", "no");
+                    JSch jsch = new JSch();
+                    File privateKey = new File(Environment.getExternalStorageDirectory(), "Announcer/id_rsa");
+                    jsch.addIdentity(privateKey.getAbsolutePath());
+                    mSession = jsch.getSession("root", host, port);
+                    mSession.connect();
+
+                    // Start SFTP channel to upload the message
+                    ChannelSftp channelsftp = (ChannelSftp) mSession.openChannel("sftp");
+                    channelsftp.connect();
+                    channelsftp.put(mFileName, "message.wav");
+                    channelsftp.disconnect();
+
+                    // Start SSH channel to play the message
+                    ChannelExec channelssh = (ChannelExec) mSession.openChannel("exec");
+                    channelssh.setCommand("aplay message.wav");
+                    channelssh.connect();
+                    channelssh.disconnect();
+                } catch (JSchException | SftpException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -167,10 +136,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        if (mPlayer != null) {
-            mPlayer.release();
-            mPlayer = null;
-        }
         if (mSession != null) {
             mSession.disconnect();
         }
