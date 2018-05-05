@@ -11,38 +11,16 @@
         android:id="@+id/bRecord"
         android:layout_width="@dimen/button_width"
         android:layout_height="wrap_content"
-        android:text="@string/record_start"
-        app:layout_constraintBottom_toTopOf="@+id/bPlay"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <Button
-        android:id="@+id/bPlay"
-        android:layout_width="@dimen/button_width"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="@string/play"
-        app:layout_constraintBottom_toTopOf="@+id/bUpload"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bRecord" />
-
-    <Button
-        android:id="@+id/bUpload"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="@string/upload"
+        android:layout_marginTop="8dp"
+        android:text="@string/record_start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bPlay" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.7" />
 
     <EditText
         android:id="@+id/etHost"
@@ -65,16 +43,29 @@
         android:id="@+id/etPort"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:ems="10"
         android:hint="@string/port"
         android:inputType="number"
-        app:layout_constraintBottom_toTopOf="@+id/bRecord"
+        app:layout_constraintBottom_toTopOf="@+id/tvKey"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etHost" />
+
+    <TextView
+        android:id="@+id/tvKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/keys"
+        app:layout_constraintBottom_toTopOf="@+id/bRecord"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etPort" />
 
 </android.support.constraint.ConstraintLayout>
